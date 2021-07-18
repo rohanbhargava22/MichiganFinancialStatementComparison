@@ -230,6 +230,12 @@ def compare_accounts(statement_type, indicators, uniform, split_matches, num_mat
 
     write_workbook.save(filename="new_indicators.xlsx")
 
+
+# We want a function to look at each of the items in the UCA, and see if it has a matching item
+# in the taxonomy. The purpose of this is to determine if the taxonomy is missing anything
+def compare_taxonomy_accounts:
+
+
 # Sometimes doing string cleaning/preprocessing before the fuzzy matching takes place can yield better results.
 # I determined it doesn't, but some ways in which it theoretically might have are commented out in the function
 
@@ -406,6 +412,8 @@ if __name__ == '__main__':
         new_row.append("A" + str(new_row[0]))
         uniform_activities_list.append(new_row)
 
+    # IF WE WANT TO USE THE REVISED UCA EXCEL, WE CAN USE THE INDIVIDUAL B,R, AND E
+    # SHEETS INSTEAD OF THIS COMBINED ONE
     # This one is for the "Combined B,R,E" sheet in this file
     uniform_bre_list = []
     for row in uniform_bre.iter_rows(min_row=2, min_col=1, max_col=3, values_only=True):
