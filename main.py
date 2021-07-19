@@ -236,17 +236,20 @@ def compare_accounts(statement_type, indicators, uniform, split_matches, num_mat
 def compare_taxonomy_accounts(sheet_name, elements_in):
     sheet = uniform_chart_workbook[sheet_name]
 
+    sheet.insert_cols(3)
+    sheet.insert_cols(5)
+
     if sheet_name == "Activities":
-        col_length = 4
+        col_length = 6
     else:
-        col_length = 3
+        col_length = 5
 
     row_num = 2
     for row in sheet.iter_rows(min_row=2, min_col=1, max_col=col_length, values_only=True):
         specific = row[1]
-        small_category = row[2]
+        small_category = row[3]
         if sheet_name == "Activities":
-            large_category = row[3]
+            large_category = row[5]
             lc_list = []
 
         s_list = []
@@ -268,12 +271,14 @@ def compare_taxonomy_accounts(sheet_name, elements_in):
         s_list = sorted(s_list, key=lambda x: (-x[2], x[3]))
         sc_list = sorted(sc_list, key=lambda x: (-x[2], x[3]))
 
-        sheet.cell(row=row_num, column=col_length+1).value = (str(s_list[0][0]) + "," + str(s_list[0][1]) + "," + str(s_list[0][2]))
-        sheet.cell(row=row_num, column=col_length + 2).value = (str(sc_list[0][0]) + "," + str(sc_list[0][1]) + "," + str(sc_list[0][2]))
+        sheet.cell(row=row_num, column=3).value = (
+                    str(s_list[0][0]) + "," + str(s_list[0][1]) + "," + str(s_list[0][2]))
+        sheet.cell(row=row_num, column=5).value = (
+                    str(sc_list[0][0]) + "," + str(sc_list[0][1]) + "," + str(sc_list[0][2]))
 
         if sheet_name == "Activities":
             lc_list = sorted(lc_list, key=lambda x: (-x[2], x[3]))
-            sheet.cell(row=row_num, column=col_length + 3).value = (str(lc_list[0][0]) + "," + str(lc_list[0][1]) + "," + str(lc_list[0][2]))
+            sheet.cell(row=row_num, column=7).value = (str(lc_list[0][0]) + "," + str(lc_list[0][1]) + "," + str(lc_list[0][2]))
 
         row_num += 1
 
@@ -497,6 +502,6 @@ if __name__ == '__main__':
     compare_accounts("Statement of Cash Flows", cash_flows_indicators, combined_list, True, 4)
     '''
 
-    compare_taxonomy_accounts("Activities", elements)
-    compare_taxonomy_accounts("Combined B,R,E", elements)
-    compare_taxonomy_accounts("Funds", elements)
+    # compare_taxonomy_accounts("Activities", elements)
+    # compare_taxonomy_accounts("Combined B,R,E", elements)
+    # compare_taxonomy_accounts("Funds", elements)
