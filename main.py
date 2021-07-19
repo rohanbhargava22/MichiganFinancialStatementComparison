@@ -285,6 +285,37 @@ def compare_taxonomy_accounts(sheet_name, elements_in):
     uniform_chart_workbook.save(filename="uniform_chart.xlsx")
 
 
+def compare_f65_taxonomy():
+    sheet = f65_workbook["Sheet1"]
+
+    row_num = 7
+    for row in sheet.iter_rows(min_row=7, min_col=1, max_col=2, values_only=True):
+        if row[0] is not None:
+            indicator = row[0]
+        else:
+            indicator = ""
+
+        i_list = []
+
+        element_num = 1
+
+        for item in elements:
+            element = item[0]
+            new_element = clean_caption(element)
+            new_element = split_capitals(new_element)
+            i_list.append(
+                [element, element_num, is_equal_num(indicator, new_element), abs(len(element) - len(indicator))])
+
+            element_num += 1
+
+        i_list = sorted(i_list, key=lambda x: (-x[2], x[3]))
+
+        sheet.cell(row=row_num, column=3).value = (
+                str(i_list[0][0]) + "," + str(i_list[0][1]) + "," + str(i_list[0][2]))
+
+        row_num += 1
+
+        f65_workbook.save(filename="Line Items from F-65.xlsx")
 
 # Sometimes doing string cleaning/preprocessing before the fuzzy matching takes place can yield better results.
 # I determined it doesn't, but some ways in which it theoretically might have are commented out in the function
@@ -505,3 +536,8 @@ if __name__ == '__main__':
     # compare_taxonomy_accounts("Activities", elements)
     # compare_taxonomy_accounts("Combined B,R,E", elements)
     # compare_taxonomy_accounts("Funds", elements)
+
+    # Creates a workbook to read from the F65
+    f65_workbook = load_workbook(filename="Line Items from F-65.xlsx")
+
+    compare_f65_taxonomy()
