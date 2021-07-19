@@ -233,7 +233,52 @@ def compare_accounts(statement_type, indicators, uniform, split_matches, num_mat
 
 # We want a function to look at each of the items in the UCA, and see if it has a matching item
 # in the taxonomy. The purpose of this is to determine if the taxonomy is missing anything
-def compare_taxonomy_accounts:
+def compare_taxonomy_accounts(sheet_name, elements_in):
+    sheet = uniform_chart_workbook[sheet_name]
+
+    if sheet_name == "Activities":
+        col_length = 4
+    else:
+        col_length = 3
+
+    row_num = 2
+    for row in sheet.iter_rows(min_row=2, min_col=1, max_col=col_length, values_only=True):
+        specific = row[1]
+        small_category = row[2]
+        if sheet_name == "Activities":
+            large_category = row[3]
+            lc_list = []
+
+        s_list = []
+        sc_list = []
+
+        element_num = 1
+
+        for item in elements_in:
+            element = item[0]
+            new_element = clean_caption(element)
+            new_element = split_capitals(new_element)
+            s_list.append([element, element_num, is_equal_num(specific, new_element), abs(len(element) - len(specific))])
+            sc_list.append([element, element_num, is_equal_num(small_category, new_element), abs(len(element) - len(small_category))])
+            if sheet_name == "Activities":
+                lc_list.append([element, element_num, is_equal_num(large_category, new_element), abs(len(element) - len(large_category))])
+
+            element_num += 1
+
+        s_list = sorted(s_list, key=lambda x: (-x[2], x[3]))
+        sc_list = sorted(sc_list, key=lambda x: (-x[2], x[3]))
+
+        sheet.cell(row=row_num, column=col_length+1).value = (str(s_list[0][0]) + "," + str(s_list[0][1]) + "," + str(s_list[0][2]))
+        sheet.cell(row=row_num, column=col_length + 2).value = (str(sc_list[0][0]) + "," + str(sc_list[0][1]) + "," + str(sc_list[0][2]))
+
+        if sheet_name == "Activities":
+            lc_list = sorted(lc_list, key=lambda x: (-x[2], x[3]))
+            sheet.cell(row=row_num, column=col_length + 3).value = (str(lc_list[0][0]) + "," + str(lc_list[0][1]) + "," + str(lc_list[0][2]))
+
+        row_num += 1
+
+    uniform_chart_workbook.save(filename="uniform_chart.xlsx")
+
 
 
 # Sometimes doing string cleaning/preprocessing before the fuzzy matching takes place can yield better results.
@@ -241,7 +286,6 @@ def compare_taxonomy_accounts:
 
 
 def clean_caption(old_word):
-
     # old_word = old_word.lower()
     # words = old_word.split()
     # Removes trailing 's' because sometimes that is a source of mismatch
@@ -256,7 +300,6 @@ def clean_caption(old_word):
     # new_word = new_word.strip()
     # new_word = new_word.strip('\n')
     # return new_word
-
     return old_word
 
 # Splits string into individual words that start with the capital letters found in the string
@@ -311,6 +354,7 @@ def cell_input(column_num, sheet_in, indicator_num_in, element_num_in):
 
 
 if __name__ == '__main__':
+    '''
     # Creates a workbook to read from the indicators Excel file
     read_workbook = load_workbook(filename="indicators.xlsx")
     read_sheet = read_workbook["Statement Agg"]
@@ -331,6 +375,7 @@ if __name__ == '__main__':
                                     write_workbook)
     cash_flows_indicators = new_indicators("Statement of Cash Flows", 10, read_sheet,
                                     write_workbook)
+    '''
 
     # Create a Beautiful Soup object from the xml/xsd file
     with open("taxonomy.xsd") as fp:
@@ -388,6 +433,8 @@ if __name__ == '__main__':
     new_filename = "taxonomy_indicators.xlsx"
     taxonomy_workbook.save(filename=new_filename)
 
+    '''
+
     # Figures out how indicators list compares to taxonomy list
     compare_taxonomy("Statement of Activities", activities_indicators, True, 4)
     compare_taxonomy("Balance Sheet", balance_indicators, True, 4)
@@ -396,12 +443,15 @@ if __name__ == '__main__':
     compare_taxonomy("Statement of Net Position Governmental Funds", governmental_funds_indicators, True, 4)
     compare_taxonomy("Statement of Net Position Proprietary Funds", proprietary_funds_indicators, True, 4)
     compare_taxonomy("Statement of Cash Flows", cash_flows_indicators, True, 4)
+    '''
+
 
     # Creates a workbook to read from the Uniform Chart of Accounts Excel file
     uniform_chart_workbook = load_workbook(filename="uniform_chart.xlsx")
     uniform_activities = uniform_chart_workbook["Activities"]
     uniform_bre = uniform_chart_workbook["Combined B,R,E"]
 
+    '''
     # Takes the Uniform Chart of Accounts Excel Spreadsheet and makes it into list with cleaned up values
     # This is one for the Activities sheet in this file
     uniform_activities_list = []
@@ -445,3 +495,8 @@ if __name__ == '__main__':
     compare_accounts("Statement of Net Position Proprietary Funds", proprietary_funds_indicators,
                      combined_list, True, 4)
     compare_accounts("Statement of Cash Flows", cash_flows_indicators, combined_list, True, 4)
+    '''
+
+    compare_taxonomy_accounts("Activities", elements)
+    compare_taxonomy_accounts("Combined B,R,E", elements)
+    compare_taxonomy_accounts("Funds", elements)
